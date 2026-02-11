@@ -7,7 +7,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 const OLLAMA_API_KEY = process.env.OLLAMA_API_KEY;
 
-// 🔹 檢查 API Key 是否有設定
+// 🔹 檢查 API Key 是否設定
 if (!OLLAMA_API_KEY) {
   console.error("❌ OLLAMA_API_KEY is NOT set! Please add it in Railway Environment Variables.");
 } else {
@@ -15,17 +15,13 @@ if (!OLLAMA_API_KEY) {
 }
 
 // 🔹 Healthcheck endpoint for Railway
-app.get("/health", (req, res) => {
-  res.send("OK");
-});
+app.get("/health", (req, res) => res.send("OK"));
 
-// 🔹 Chat endpoint
+// 🔹 /chat endpoint
 app.post("/chat", async (req, res) => {
   if (!OLLAMA_API_KEY) {
     return res.status(500).json({ error: "Server missing API Key" });
   }
-
-  console.log("📨 Received request:", JSON.stringify(req.body));
 
   try {
     const response = await axios.post(
@@ -39,7 +35,6 @@ app.post("/chat", async (req, res) => {
       }
     );
 
-    console.log("✅ Ollama response received");
     res.json(response.data);
   } catch (error) {
     console.error("❌ Request to Ollama Cloud failed:", error.response?.data || error.message);
@@ -49,7 +44,7 @@ app.post("/chat", async (req, res) => {
   }
 });
 
-// 🔹 監聽所有網卡，保證 Railway 可外部訪問
+// 🔹 使用 0.0.0.0 監聽，Railway Edge 才能訪問
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Proxy Server running on port ${PORT}`);
 });
