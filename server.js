@@ -4,7 +4,7 @@ const axios = require("axios");
 const app = express();
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT; // 直接用 Railway 提供的端口
 const OLLAMA_API_KEY = process.env.OLLAMA_API_KEY;
 
 // 🔹 檢查 API Key 是否有設定
