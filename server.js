@@ -4,9 +4,17 @@ const axios = require("axios");
 const app = express();
 app.use(express.json());
 
+
 // 🔹 Railway 必須使用 process.env.PORT
 const PORT = process.env.PORT;
+if (!PORT) {
+  console.error("❌ process.env.PORT not set!"); 
+  process.exit(1);
+}
+
+
 const OLLAMA_API_KEY = process.env.OLLAMA_API_KEY;
+
 
 // 🔹 啟動時檢查 API Key
 if (!OLLAMA_API_KEY) {
