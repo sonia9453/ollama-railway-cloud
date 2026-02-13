@@ -60,4 +60,5 @@ app.post("/api/chat", async (req, res) => {
 // 🔹 啟動服務，0.0.0.0 保證外部可訪問
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Proxy Server running on port ${PORT}`);
+  console.log("PORT=", process.env.PORT);
 });
