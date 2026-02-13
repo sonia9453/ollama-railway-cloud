@@ -6,7 +6,7 @@ app.use(express.json());
 
 
 // 🔹 Railway 必須使用 process.env.PORT
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 if (!PORT) {
   console.error("❌ process.env.PORT not set!"); 
   process.exit(1);
