@@ -4,47 +4,58 @@ const axios = require("axios");
 const app = express();
 app.use(express.json());
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 const OLLAMA_API_KEY = process.env.OLLAMA_API_KEY;
 
-// 🔹 檢查 API Key 是否設定
+// ✅ 啟動時檢查 API Key
 if (!OLLAMA_API_KEY) {
-  console.error("❌ OLLAMA_API_KEY is NOT set! Please add it in Railway Environment Variables.");
+  console.error("❌ OLLAMA_API_KEY is NOT set! Please configure it in Railway.");
 } else {
-  console.log("✅ OLLAMA_API_KEY is set (hidden for security)");
+  console.log("✅ OLLAMA_API_KEY is set (hidden)");
 }
 
-// 🔹 Healthcheck endpoint for Railway
-app.get("/health", (req, res) => res.send("OK"));
+// ✅ Health check
+app.get("/health", (req, res) => {
+  res.send("OK");
+});
 
-// 🔹 /chat endpoint
-app.post("/chat", async (req, res) => {
+// ✅ Proxy endpoint
+app.post("/api/chat", async (req, res) => {
+
+  // 🔒 每次請求前再檢查一次（避免空值）
   if (!OLLAMA_API_KEY) {
-    return res.status(500).json({ error: "Server missing API Key" });
+    return res.status(500).json({
+      error: "Server missing OLLAMA_API_KEY"
+    });
   }
 
   try {
     const response = await axios.post(
-      "https://api.ollama.com/v1/chat/completions",
-      req.body,
+      "https://ollama.com/api/chat",
+      {
+        ...req.body,
+        stream: false // 建議關閉 streaming（比較穩定）
+      },
       {
         headers: {
-          "Authorization": `Bearer ${OLLAMA_API_KEY}`,
+          Authorization: `Bearer ${OLLAMA_API_KEY}`,
           "Content-Type": "application/json"
         }
       }
     );
 
-    res.json(response.data);
+    res.status(response.status).json(response.data);
+
   } catch (error) {
-    console.error("❌ Request to Ollama Cloud failed:", error.response?.data || error.message);
-    res.status(500).json({
-      error: error.response?.data || error.message
-    });
+    console.error("❌ Ollama Cloud Error:", error.response?.data || error.message);
+
+    res.status(error.response?.status || 500).json(
+      error.response?.data || { error: error.message }
+    );
   }
 });
 
-// 🔹 使用 0.0.0.0 監聽，Railway Edge 才能訪問
+// ✅ 啟動 server
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Proxy Server running on port ${PORT}`);
+  console.log(`🚀 Proxy running on port ${PORT}`);
 });
